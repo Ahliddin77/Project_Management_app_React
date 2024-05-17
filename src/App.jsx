@@ -10,12 +10,37 @@ function App() {
     projects: [],
   });
 
+  function handleToggleTaskStatus(taskId) {
+    setProjectsState((prevState) => {
+      const updatedProjects = prevState.projects.map((project) => {
+        if (project.id === prevState.selectedProjectId) {
+          return {
+            ...project,
+            tasks: project.tasks.map((task) => {
+              if (task.id === taskId) {
+                return { ...task, completed: !task.completed };
+              }
+              return task;
+            }),
+          };
+        }
+        return project;
+      });
+
+      return {
+        ...prevState,
+        projects: updatedProjects,
+      };
+    });
+  }
+
   function handleAddTask(text) {
     setProjectsState((prevState) => {
       const taskId = Math.random();
       const newTask = {
         text: text,
         id: taskId,
+        completed: false,
       };
 
       const updatedProjects = prevState.projects.map((project) => {
@@ -118,6 +143,7 @@ function App() {
       onDelete={handleDeleteProject}
       onAddTask={handleAddTask}
       onDeleteTask={handleDeleteTask}
+      onToggleTaskStatus={handleToggleTaskStatus}
       tasks={selectedProject ? selectedProject.tasks : []} // Pass tasks of the selected project
     />
   );
