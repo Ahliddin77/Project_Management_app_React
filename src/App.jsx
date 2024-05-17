@@ -93,13 +93,30 @@ function App() {
       const newProject = {
         ...projectData,
         id: Math.random(),
-        tasks: [], // Initialize tasks array for the new project
+        tasks: [],
+        completed: false, // Initialize tasks array for the new project
       };
 
       return {
         ...prevState,
         selectedProjectId: undefined,
         projects: [...prevState.projects, newProject],
+      };
+    });
+  }
+
+  function handleToggleProjectStatus(projectId) {
+    setProjectsState((prevState) => {
+      const updatedProjects = prevState.projects.map((project) => {
+        if (project.id === projectId) {
+          return { ...project, completed: !project.completed };
+        }
+        return project;
+      });
+
+      return {
+        ...prevState,
+        projects: updatedProjects,
       };
     });
   }
@@ -163,6 +180,7 @@ function App() {
         projects={projectsState.projects}
         onSelectProject={handleSelectProject}
         selectedProjectId={projectsState.selectedProjectId}
+        onToggleProjectStatus={handleToggleProjectStatus}
       />
       {content}
     </main>

@@ -5,6 +5,7 @@ export default function ProjectSidebar({
   projects,
   onSelectProject,
   selectedProjectId,
+  onToggleProjectStatus,
 }) {
   return (
     <aside className="w-1/3 px-8 py-16 bg-stone-900 text-stone-50 md:w-72 rounded-r-xl">
@@ -23,14 +24,28 @@ export default function ProjectSidebar({
           } else {
             cssClasses += " text-stone-400";
           }
+          if (project.completed) {
+            cssClasses += " line-through text-gray-500";
+          }
           return (
             <li key={project.id}>
-              <button
-                className={cssClasses}
-                onClick={() => onSelectProject(project.id)}
-              >
-                {project.title}
-              </button>
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  checked={project.completed}
+                  onChange={(e) => {
+                    e.stopPropagation();
+                    onToggleProjectStatus(project.id);
+                  }}
+                  className="mr-2"
+                />
+                <button
+                  className={cssClasses}
+                  onClick={() => onSelectProject(project.id)}
+                >
+                  {project.title}
+                </button>
+              </div>
             </li>
           );
         })}
