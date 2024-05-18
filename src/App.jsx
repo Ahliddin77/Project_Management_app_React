@@ -140,14 +140,15 @@ function App() {
     });
   }
 
-  function handleDeleteProject() {
+  function handleDeleteProject(id) {
     setProjectsState((prevState) => {
       return {
         ...prevState,
-        selectedProjectId: undefined,
-        projects: prevState.projects.filter(
-          (project) => project.id !== prevState.selectedProjectId
-        ),
+        selectedProjectId:
+          prevState.selectedProjectId === id
+            ? undefined
+            : prevState.selectedProjectId,
+        projects: prevState.projects.filter((project) => project.id !== id),
       };
     });
   }
@@ -187,7 +188,6 @@ function App() {
         projects: updatedProjects,
       };
     });
-    console.log(projectsState);
   }
 
   const selectedProject = projectsState.projects.find(
