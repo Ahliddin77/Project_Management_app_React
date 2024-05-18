@@ -1,4 +1,5 @@
 import Button from "./Button";
+import { useState, useEffect } from "react";
 
 export default function ProjectSidebar({
   onStartAddProject,
@@ -7,6 +8,14 @@ export default function ProjectSidebar({
   selectedProjectId,
   onToggleProjectStatus,
 }) {
+  const [sortedProjects, setSortedProjects] = useState(projects);
+
+  useEffect(() => {
+    const completedProjects = projects.filter((project) => project.completed);
+    const incompleteProjects = projects.filter((project) => !project.completed);
+    setSortedProjects([...incompleteProjects, ...completedProjects]);
+  }, [projects]);
+
   return (
     <aside className="w-1/3 px-8 py-16 bg-stone-900 text-stone-50 md:w-72 rounded-r-xl">
       <h2 className="mb-8 font-bold uppercase md:text-xl text-stone-200">
@@ -16,7 +25,7 @@ export default function ProjectSidebar({
         <Button onClick={onStartAddProject}>+ Add Project</Button>
       </div>
       <ul className="mt-8">
-        {projects.map((project) => {
+        {sortedProjects.map((project) => {
           let cssClasses =
             "w-full text-left px-2 py-1 rounded-sm my-1 hover:text-stone-200 hover:bg-stone-800";
           if (project.id === selectedProjectId) {
