@@ -7,6 +7,7 @@ export default function SelectedProject({
   onDeleteTask,
   tasks,
   onToggleTaskStatus,
+  onTogglePin,
 }) {
   const formattedDate = new Date(project.dueDate).toLocaleDateString("en-US", {
     year: "numeric",
@@ -38,6 +39,7 @@ export default function SelectedProject({
         onDelete={onDeleteTask}
         tasks={tasks}
         onToggleStatus={onToggleTaskStatus}
+        onTogglePin={onTogglePin}
       />
     </div>
   );

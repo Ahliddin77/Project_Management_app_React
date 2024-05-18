@@ -151,6 +151,27 @@ function App() {
     });
   }
 
+  function handleTogglePin(taskId) {
+    setProjectsState((prevState) => {
+      const updatedProjects = prevState.projects.map((project) => {
+        if (project.id === prevState.selectedProjectId) {
+          return {
+            ...project,
+            tasks: project.tasks.map((task) =>
+              task.id === taskId ? { ...task, pinned: !task.pinned } : task
+            ),
+          };
+        }
+        return project;
+      });
+
+      return {
+        ...prevState,
+        projects: updatedProjects,
+      };
+    });
+  }
+
   const selectedProject = projectsState.projects.find(
     (project) => project.id === projectsState.selectedProjectId
   );
@@ -161,6 +182,7 @@ function App() {
       onAddTask={handleAddTask}
       onDeleteTask={handleDeleteTask}
       onToggleTaskStatus={handleToggleTaskStatus}
+      onTogglePin={handleTogglePin}
       tasks={selectedProject ? selectedProject.tasks : []} // Pass tasks of the selected project
     />
   );

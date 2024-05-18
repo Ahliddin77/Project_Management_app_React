@@ -1,15 +1,26 @@
 import NewTask from "./NewTask";
 import { useState, useEffect } from "react";
-import { FaEllipsisV } from "react-icons/fa";
+import { FaEllipsisV, FaThumbtack } from "react-icons/fa"; // Import pin icon
 
-export default function Tasks({ tasks, onAdd, onDelete, onToggleStatus }) {
+export default function Tasks({
+  tasks,
+  onAdd,
+  onDelete,
+  onToggleStatus,
+  onTogglePin,
+}) {
   const [sortedTasks, setSortedTasks] = useState(tasks);
   const [openDropdownId, setOpenDropdownId] = useState(null);
 
   useEffect(() => {
-    const completedTasks = tasks.filter((task) => task.completed);
-    const incompleteTasks = tasks.filter((task) => !task.completed);
-    setSortedTasks([...incompleteTasks, ...completedTasks]);
+    const pinnedTasks = tasks.filter((task) => task.pinned);
+    const completedTasks = tasks.filter(
+      (task) => task.completed && !task.pinned
+    );
+    const incompleteTasks = tasks.filter(
+      (task) => !task.completed && !task.pinned
+    );
+    setSortedTasks([...pinnedTasks, ...incompleteTasks, ...completedTasks]);
   }, [tasks]);
 
   const toggleDropdown = (taskId) => {
@@ -50,6 +61,9 @@ export default function Tasks({ tasks, onAdd, onDelete, onToggleStatus }) {
                 >
                   {task.text}
                 </span>
+                {task.pinned && (
+                  <FaThumbtack className="ml-2 text-stone-700" /> // Pin icon for pinned tasks
+                )}
               </div>
               <div className="relative">
                 <button
@@ -60,6 +74,15 @@ export default function Tasks({ tasks, onAdd, onDelete, onToggleStatus }) {
                 </button>
                 {openDropdownId === task.id && (
                   <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded shadow-lg z-10">
+                    <button
+                      className="block w-full text-left px-4 py-2 text-stone-700 hover:bg-gray-100"
+                      onClick={() => {
+                        onTogglePin(task.id); // Use the function passed from the parent
+                        setOpenDropdownId(null);
+                      }}
+                    >
+                      {task.pinned ? "Unpin" : "Pin"}
+                    </button>
                     <button
                       className="block w-full text-left px-4 py-2 text-stone-700 hover:bg-red-100 hover:text-red-500"
                       onClick={() => {
