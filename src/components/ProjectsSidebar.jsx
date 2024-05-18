@@ -1,5 +1,6 @@
 import Button from "./Button";
 import { useState, useEffect } from "react";
+import { FaEllipsisV, FaThumbtack } from "react-icons/fa";
 
 export default function ProjectSidebar({
   onStartAddProject,
@@ -7,13 +8,34 @@ export default function ProjectSidebar({
   onSelectProject,
   selectedProjectId,
   onToggleProjectStatus,
+  onDeleteProject,
+  onTogglePinProject,
 }) {
+  const [openDropdownId, setOpenDropdownId] = useState(null);
   const [sortedProjects, setSortedProjects] = useState(projects);
 
+  const toggleDropdown = (projectId) => {
+    if (openDropdownId === projectId) {
+      setOpenDropdownId(null);
+    } else {
+      setOpenDropdownId(projectId);
+    }
+  };
+
   useEffect(() => {
-    const completedProjects = projects.filter((project) => project.completed);
-    const incompleteProjects = projects.filter((project) => !project.completed);
-    setSortedProjects([...incompleteProjects, ...completedProjects]);
+    const sortedProjects = [...projects].sort((a, b) => {
+      if (a.pinned !== b.pinned) {
+        return a.pinned ? -1 : 1;
+      }
+
+      if (a.completed !== b.completed) {
+        return a.completed ? 1 : -1;
+      }
+
+      return a.title.localeCompare(b.title);
+    });
+
+    setSortedProjects(sortedProjects);
   }, [projects]);
 
   return (
@@ -37,8 +59,8 @@ export default function ProjectSidebar({
             cssClasses += " line-through text-gray-500";
           }
           return (
-            <li key={project.id}>
-              <div className="flex items-center">
+            <li key={project.id} className="relative">
+              <div className="flex items-center justify-between">
                 <input
                   type="checkbox"
                   checked={project.completed}
@@ -54,6 +76,36 @@ export default function ProjectSidebar({
                 >
                   {project.title}
                 </button>
+                <div className="relative">
+                  <button
+                    className="text-stone-50 hover:text-stone-200"
+                    onClick={() => toggleDropdown(project.id)}
+                  >
+                    {project.pinned ? <FaThumbtack /> : <FaEllipsisV />}
+                  </button>
+                  {openDropdownId === project.id && (
+                    <div className="absolute right-0 mt-2 w-48 bg-stone-700 border border-stone-600 rounded shadow-lg z-10">
+                      <button
+                        className="block w-full text-left px-4 py-2 text-stone-50 hover:bg-stone-600"
+                        onClick={() => {
+                          onTogglePinProject(project.id);
+                          setOpenDropdownId(null);
+                        }}
+                      >
+                        {project.pinned ? "Unpin" : "Pin"}
+                      </button>
+                      <button
+                        className="block w-full text-left px-4 py-2 text-stone-50 hover:bg-red-600"
+                        onClick={() => {
+                          onDeleteProject(project.id);
+                          setOpenDropdownId(null);
+                        }}
+                      >
+                        Clear
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
             </li>
           );

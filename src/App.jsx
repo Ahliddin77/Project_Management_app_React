@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import NewProject from "./components/NewProject";
 import NoProjectSelected from "./components/NoProjectSelected";
 import ProjectSidebar from "./components/ProjectsSidebar";
@@ -94,7 +94,8 @@ function App() {
         ...projectData,
         id: Math.random(),
         tasks: [],
-        completed: false, // Initialize tasks array for the new project
+        completed: false,
+        pinned: false,
       };
 
       return {
@@ -172,6 +173,23 @@ function App() {
     });
   }
 
+  function handleTogglePinProject(projectId) {
+    setProjectsState((prevState) => {
+      const updatedProjects = prevState.projects.map((project) => {
+        if (project.id === projectId) {
+          return { ...project, pinned: !project.pinned };
+        }
+        return project;
+      });
+
+      return {
+        ...prevState,
+        projects: updatedProjects,
+      };
+    });
+    console.log(projectsState);
+  }
+
   const selectedProject = projectsState.projects.find(
     (project) => project.id === projectsState.selectedProjectId
   );
@@ -183,7 +201,7 @@ function App() {
       onDeleteTask={handleDeleteTask}
       onToggleTaskStatus={handleToggleTaskStatus}
       onTogglePin={handleTogglePin}
-      tasks={selectedProject ? selectedProject.tasks : []} // Pass tasks of the selected project
+      tasks={selectedProject ? selectedProject.tasks : []}
     />
   );
 
@@ -203,6 +221,8 @@ function App() {
         onSelectProject={handleSelectProject}
         selectedProjectId={projectsState.selectedProjectId}
         onToggleProjectStatus={handleToggleProjectStatus}
+        onDeleteProject={handleDeleteProject}
+        onTogglePinProject={handleTogglePinProject}
       />
       {content}
     </main>
