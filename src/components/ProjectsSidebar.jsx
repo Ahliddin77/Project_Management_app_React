@@ -1,6 +1,10 @@
 import Button from "./Button";
 import { useState, useEffect } from "react";
 import { FaEllipsisV, FaThumbtack } from "react-icons/fa";
+import { useGlobalContext } from "../hooks/useGlobalContext";
+import { signOut } from "firebase/auth";
+import { auth } from "../firebase/firebaseConfig";
+import { IoMdLogOut } from "react-icons/io";
 
 export default function ProjectSidebar({
   onStartAddProject,
@@ -38,15 +42,27 @@ export default function ProjectSidebar({
     setSortedProjects(sortedProjects);
   }, [projects]);
 
+  const { dispatch } = useGlobalContext();
+
+  const logoutAccount = () => {
+    signOut(auth)
+      .then(() => {
+        dispatch({ type: "LOGOUT" });
+      })
+      .catch((error) => {
+        alert(error);
+      });
+  };
+
   return (
-    <aside className="w-1/3 px-8 py-16 bg-stone-900 text-stone-50 md:w-72 rounded-r-xl">
+    <aside className="w-1/3 px-8 py-16 bg-stone-900 text-stone-50 md:w-72 rounded-r-xl flex flex-col">
       <h2 className="mb-8 font-bold uppercase md:text-xl text-stone-200">
         Your Projects
       </h2>
       <div>
         <Button onClick={onStartAddProject}>+ Add Project</Button>
       </div>
-      <ul className="mt-8">
+      <ul className="mt-8 mb-auto">
         {sortedProjects.map((project) => {
           let cssClasses =
             "w-full text-left px-2 py-1 rounded-sm my-1 hover:text-stone-200 hover:bg-stone-800";
@@ -111,6 +127,14 @@ export default function ProjectSidebar({
           );
         })}
       </ul>
+
+      <button
+        onClick={logoutAccount}
+        className="btn btn-square w-full flex items-center"
+      >
+        <span>Logout</span>
+        <IoMdLogOut className="w-5 h-5" />
+      </button>
     </aside>
   );
 }
