@@ -1,14 +1,31 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import NewProject from "./components/NewProject";
 import NoProjectSelected from "./components/NoProjectSelected";
 import ProjectSidebar from "./components/ProjectsSidebar";
 import SelectedProject from "./components/SelectedProject";
+import ProtectedRoutes from "./components/ProtectedRoutes";
+import { useGlobalContext } from "./hooks/useGlobalContext";
+
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "./firebase/firebaseConfig";
+
+// react router dom
+import {
+  createBrowserRouter,
+  Navigate,
+  RouterProvider,
+} from "react-router-dom";
+
+// pages
+import Login from "./pages/Login";
+import Register from "./pages/Register";
 
 function App() {
   const [projectsState, setProjectsState] = useState({
     selectedProjectId: undefined,
     projects: [],
   });
+  const { user, authReady, dispatch } = useGlobalContext();
 
   function handleToggleTaskStatus(taskId) {
     setProjectsState((prevState) => {
@@ -213,20 +230,44 @@ function App() {
     content = <NoProjectSelected onStartAddProject={handleStartAddProject} />;
   }
 
-  return (
-    <main className="h-screen my-8 flex gap-8">
-      <ProjectSidebar
-        onStartAddProject={handleStartAddProject}
-        projects={projectsState.projects}
-        onSelectProject={handleSelectProject}
-        selectedProjectId={projectsState.selectedProjectId}
-        onToggleProjectStatus={handleToggleProjectStatus}
-        onDeleteProject={handleDeleteProject}
-        onTogglePinProject={handleTogglePinProject}
-      />
-      {content}
-    </main>
-  );
+  const routes = createBrowserRouter([
+    {
+      path: "/",
+      element: (
+        <ProtectedRoutes user={user}>
+          <main className="h-screen my-8 flex gap-8">
+            <ProjectSidebar
+              onStartAddProject={handleStartAddProject}
+              projects={projectsState.projects}
+              onSelectProject={handleSelectProject}
+              selectedProjectId={projectsState.selectedProjectId}
+              onToggleProjectStatus={handleToggleProjectStatus}
+              onDeleteProject={handleDeleteProject}
+              onTogglePinProject={handleTogglePinProject}
+            />
+            {content}
+          </main>
+        </ProtectedRoutes>
+      ),
+    },
+    {
+      path: "/login",
+      element: user ? <Navigate to="/" /> : <Login />,
+    },
+    {
+      path: "/signup",
+      element: user ? <Navigate to="/" /> : <Register />,
+    },
+  ]);
+
+  useEffect(() => {
+    onAuthStateChanged(auth, (user) => {
+      dispatch({ type: "LOGIN", payload: user });
+      dispatch({ type: "AUTH_READY", payload: true });
+    });
+  }, []);
+
+  return <>{authReady && <RouterProvider router={routes} />}</>;
 }
 
 export default App;
