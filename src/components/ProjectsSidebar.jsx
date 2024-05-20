@@ -1,10 +1,19 @@
+// components
 import Button from "./Button";
+
+// react imports
 import { useState, useEffect } from "react";
 import { FaEllipsisV, FaThumbtack } from "react-icons/fa";
-import { useGlobalContext } from "../hooks/useGlobalContext";
+
+// firebase imports
 import { signOut } from "firebase/auth";
 import { auth } from "../firebase/firebaseConfig";
+
+// icon
 import { IoMdLogOut } from "react-icons/io";
+
+// global context
+import { useGlobalContext } from "../hooks/useGlobalContext";
 
 export default function ProjectSidebar({
   onStartAddProject,
@@ -42,8 +51,9 @@ export default function ProjectSidebar({
     setSortedProjects(sortedProjects);
   }, [projects]);
 
-  const { dispatch } = useGlobalContext();
+  const { dispatch, user } = useGlobalContext();
 
+  // log out function
   const logoutAccount = () => {
     signOut(auth)
       .then(() => {
@@ -128,13 +138,29 @@ export default function ProjectSidebar({
         })}
       </ul>
 
-      <button
-        onClick={logoutAccount}
-        className="btn btn-square w-full flex items-center"
-      >
-        <span>Logout</span>
-        <IoMdLogOut className="w-5 h-5" />
-      </button>
+      <div className="flex flex-col gap-y-5 justify-center items-center">
+        {user.displayName && user.photoURL ? (
+          <>
+            <div className="flex gap-5 items-center">
+              <div className="avatar">
+                <div className="w-10 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
+                  <img src={user.photoURL} />
+                </div>
+              </div>
+              <h3 className="font-bold capitalize">{user.displayName}</h3>
+            </div>
+          </>
+        ) : (
+          ""
+        )}
+        <button
+          onClick={logoutAccount}
+          className="btn btn-square w-full flex items-center"
+        >
+          <span>Logout</span>
+          <IoMdLogOut className="w-5 h-5" />
+        </button>
+      </div>
     </aside>
   );
 }
