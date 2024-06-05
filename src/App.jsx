@@ -20,6 +20,10 @@ import {
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 
+// actions
+import { action as RegisterAction } from "./pages/Register";
+import { action as LoginAction } from "./pages/Login";
+
 function App() {
   const [projectsState, setProjectsState] = useState({
     selectedProjectId: undefined,
@@ -230,6 +234,8 @@ function App() {
     content = <NoProjectSelected onStartAddProject={handleStartAddProject} />;
   }
 
+  // actions
+
   const routes = createBrowserRouter([
     {
       path: "/",
@@ -252,10 +258,12 @@ function App() {
     },
     {
       path: "/login",
+      action: LoginAction,
       element: user ? <Navigate to="/" /> : <Login />,
     },
     {
-      path: "/signup",
+      path: "/register",
+      action: RegisterAction,
       element: user ? <Navigate to="/" /> : <Register />,
     },
   ]);
