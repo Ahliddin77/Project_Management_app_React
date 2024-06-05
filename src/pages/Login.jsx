@@ -1,8 +1,11 @@
 // custom hooks
-import useLogin from "../hooks/useLogin";
+import { useLogin } from "../hooks/useLogin";
+
+// react imports
+import { useEffect } from "react";
 
 // react router dom imports
-import { Form, Link } from "react-router-dom";
+import { Form, Link, useActionData } from "react-router-dom";
 
 // components
 import FormInput from "../components/FormInput";
@@ -21,7 +24,17 @@ export const action = async ({ request }) => {
 };
 
 function Login() {
-  const { loginWithGoogle } = useLogin();
+  const { loginWithGoogle, loginWithEmail, isPending } = useLogin();
+
+  const userData = useActionData();
+
+  useEffect(() => {
+    if (userData) {
+      const { email, password } = userData;
+      loginWithEmail(email, password);
+    }
+  }, [userData]);
+
   return (
     <div className="grid place-items-center min-h-screen">
       <Form
@@ -33,12 +46,16 @@ function Login() {
         <FormInput name="password" type="password" label="Password" />
 
         <div className="mb-2">
-          <button type="button" className="btn btn-primary btn-block">
-            Google
+          <button
+            onClick={loginWithGoogle}
+            type="button"
+            className="btn btn-primary btn-block"
+          >
+            {isPending ? "Loading..." : "Google"}
           </button>
         </div>
         <button type="submit" className="btn btn-neutral mb-3">
-          Login
+          {isPending ? "Loading..." : "Login"}
         </button>
         <p className="text-center">
           Already member ?

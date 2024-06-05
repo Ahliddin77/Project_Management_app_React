@@ -13,8 +13,6 @@ import { useGlobalContext } from "./useGlobalContext";
 
 function useRegister() {
   const [isPending, setIsPending] = useState(false);
-  // const [user, setUser] = useState(false);
-  // const [error, setError] = useState(null);
 
   const { dispatch } = useGlobalContext();
 
@@ -34,10 +32,8 @@ function useRegister() {
       dispatch({ type: "LOGIN", payload: user });
       setUser(user);
       setIsPending(true);
-      setError(null);
       toast.success("Welcome");
     } catch (error) {
-      setError(error.message);
       setIsPending(false);
       console.log(error.message);
       toast.error(error.message);
