@@ -1,6 +1,24 @@
+// custom hooks
 import useLogin from "../hooks/useLogin";
 
+// react router dom imports
 import { Form, Link } from "react-router-dom";
+
+// components
+import FormInput from "../components/FormInput";
+
+// action
+export const action = async ({ request }) => {
+  let formData = await request.formData();
+  let email = formData.get("email");
+  let password = formData.get("password");
+
+  console.log(email, password);
+  return {
+    email,
+    password,
+  };
+};
 
 function Login() {
   const { loginWithGoogle } = useLogin();
@@ -11,47 +29,21 @@ function Login() {
         method="post"
       >
         <h1 className="text-center mb-5 font-bold text-4xl">Login</h1>
-        <label className="form-control w-full mb-3">
-          <div className="label">
-            <span className="label-text">Email:</span>
-          </div>
-          <input
-            type="text"
-            placeholder="Type here"
-            className="input input-bordered w-full"
-          />
-        </label>
-        <label className="form-control w-full mb-3">
-          <div className="label">
-            <span className="label-text">Password:</span>
-          </div>
-          <input
-            type="text"
-            placeholder="Type here"
-            className="input input-bordered w-full"
-          />
-        </label>
+        <FormInput name="email" type="email" label="Email" />
+        <FormInput name="password" type="password" label="Password" />
+
         <div className="mb-2">
-          <button
-            type="button"
-            className="btn btn-primary btn-block"
-            onClick={loginWithGoogle}
-          >
+          <button type="button" className="btn btn-primary btn-block">
             Google
           </button>
         </div>
-        <button
-          type="button"
-          className="btn btn-neutral mb-3"
-          onClick={loginWithGoogle}
-          disabled
-        >
+        <button type="submit" className="btn btn-neutral mb-3">
           Login
         </button>
         <p className="text-center">
-          Already member ?{" "}
-          <Link to="/signup" className="link link-primary">
-            Signup
+          Already member ?
+          <Link to="/register" className="link link-primary">
+            Register
           </Link>
         </p>
       </Form>

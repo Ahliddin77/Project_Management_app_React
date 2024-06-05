@@ -14,6 +14,7 @@ import { IoMdLogOut } from "react-icons/io";
 
 // global context
 import { useGlobalContext } from "../hooks/useGlobalContext";
+import toast from "react-hot-toast";
 
 export default function ProjectSidebar({
   onStartAddProject,
@@ -58,9 +59,10 @@ export default function ProjectSidebar({
     signOut(auth)
       .then(() => {
         dispatch({ type: "LOGOUT" });
+        toast.success("You have been logged out");
       })
       .catch((error) => {
-        alert(error);
+        toast.error(error.message);
       });
   };
 
