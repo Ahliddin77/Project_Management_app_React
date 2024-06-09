@@ -24,7 +24,12 @@ export default function SelectedProject({
           </h1>
           <button
             className="text-stone-600 hover:text-stone-950"
-            onClick={() => onDelete(project.id)}
+firebase-database
+
+            onClick={() => {
+              onDelete(project.id);
+            }}
+ main
           >
             Delete
           </button>
