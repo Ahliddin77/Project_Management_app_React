@@ -4,6 +4,7 @@ import FormInput from "../components/FormInput";
 
 // custom register hook
 import { useRegister } from "../hooks/useRegister";
+import { useLogin } from "../hooks/useLogin";
 import { useEffect } from "react";
 
 export const action = async ({ request }) => {
@@ -23,6 +24,7 @@ export const action = async ({ request }) => {
 
 function Register() {
   const { register, isPending } = useRegister();
+  const { loginWithGoogle } = useLogin();
 
   const userData = useActionData();
 
@@ -46,7 +48,11 @@ function Register() {
         <FormInput name="password" type="password" label="Password" />
 
         <div className="mb-2">
-          <button type="button" className="btn btn-primary btn-block">
+          <button
+            onClick={loginWithGoogle}
+            type="button"
+            className="btn btn-primary btn-block"
+          >
             Google
           </button>
         </div>
