@@ -1,13 +1,27 @@
+// react imports
 import { useEffect, useState } from "react";
+
+// components
 import NewProject from "./components/NewProject";
 import NoProjectSelected from "./components/NoProjectSelected";
 import ProjectSidebar from "./components/ProjectsSidebar";
 import SelectedProject from "./components/SelectedProject";
 import ProtectedRoutes from "./components/ProtectedRoutes";
-import { useGlobalContext } from "./hooks/useGlobalContext";
 
+// custom hooks
+import { useGlobalContext } from "./hooks/useGlobalContext";
+import { useCollection } from "./firebase/useCollection";
+
+// firebase imports
 import { onAuthStateChanged } from "firebase/auth";
-import { auth } from "./firebase/firebaseConfig";
+import { auth, db } from "./firebase/firebaseConfig";
+import {
+  doc,
+  updateDoc,
+  collection,
+  addDoc,
+  deleteDoc,
+} from "firebase/firestore";
 
 // react router dom
 import {
@@ -23,6 +37,7 @@ import Register from "./pages/Register";
 // actions
 import { action as RegisterAction } from "./pages/Register";
 import { action as LoginAction } from "./pages/Login";
+import toast from "react-hot-toast";
 
 function App() {
   const [projectsState, setProjectsState] = useState({
@@ -30,20 +45,33 @@ function App() {
     projects: [],
   });
   const { user, authReady, dispatch } = useGlobalContext();
+  const { projects } = useCollection("projects", ["uid", "==", user?.uid]);
+
+  useEffect(() => {
+    setProjectsState((prevState) => {
+      return {
+        ...prevState,
+        projects: projects || [],
+      };
+    });
+  }, [projects]);
 
   function handleToggleTaskStatus(taskId) {
     setProjectsState((prevState) => {
       const updatedProjects = prevState.projects.map((project) => {
         if (project.id === prevState.selectedProjectId) {
-          return {
-            ...project,
+          const productRef = doc(db, "projects", project.id);
+
+          updateDoc(productRef, {
             tasks: project.tasks.map((task) => {
               if (task.id === taskId) {
                 return { ...task, completed: !task.completed };
               }
               return task;
             }),
-          };
+          }).then(() => {
+            toast.success("Task updated successfully");
+          });
         }
         return project;
       });
@@ -66,10 +94,13 @@ function App() {
 
       const updatedProjects = prevState.projects.map((project) => {
         if (project.id === prevState.selectedProjectId) {
-          return {
-            ...project,
+          const productRef = doc(db, "projects", project.id);
+
+          updateDoc(productRef, {
             tasks: [newTask, ...project.tasks],
-          };
+          }).then((data) => {
+            toast.success("Task added successfully");
+          });
         }
         return project;
       });
@@ -85,10 +116,13 @@ function App() {
     setProjectsState((prevState) => {
       const updatedProjects = prevState.projects.map((project) => {
         if (project.id === prevState.selectedProjectId) {
-          return {
-            ...project,
+          const productRef = doc(db, "projects", project.id);
+
+          updateDoc(productRef, {
             tasks: project.tasks.filter((task) => task.id !== taskId),
-          };
+          }).then((data) => {
+            toast.success("Delete successfully");
+          });
         }
         return project;
       });
@@ -109,20 +143,27 @@ function App() {
     });
   }
 
-  function handleAddProject(projectData) {
-    setProjectsState((prevState) => {
-      const newProject = {
-        ...projectData,
-        id: Math.random(),
-        tasks: [],
-        completed: false,
-        pinned: false,
-      };
+  async function handleAddProject(projectData) {
+    const newProject = {
+      ...projectData,
+      tasks: [],
+      uid: user.uid,
+      completed: false,
+      pinned: false,
+    };
 
+    addDoc(collection(db, "projects"), newProject)
+      .then(() => {
+        toast.success("Project added successfully");
+      })
+      .catch((error) => {
+        toast.error("Error adding project");
+      });
+
+    setProjectsState((prevState) => {
       return {
         ...prevState,
         selectedProjectId: undefined,
-        projects: [...prevState.projects, newProject],
       };
     });
   }
@@ -131,7 +172,13 @@ function App() {
     setProjectsState((prevState) => {
       const updatedProjects = prevState.projects.map((project) => {
         if (project.id === projectId) {
-          return { ...project, completed: !project.completed };
+          const productRef = doc(db, "projects", project.id);
+
+          updateDoc(productRef, {
+            completed: !project.completed,
+          }).then((data) => {
+            toast.success("Successfully");
+          });
         }
         return project;
       });
@@ -162,15 +209,14 @@ function App() {
   }
 
   function handleDeleteProject(id) {
-    setProjectsState((prevState) => {
-      return {
-        ...prevState,
-        selectedProjectId:
-          prevState.selectedProjectId === id
-            ? undefined
-            : prevState.selectedProjectId,
-        projects: prevState.projects.filter((project) => project.id !== id),
-      };
+    deleteDoc(doc(db, "projects", id)).then(() => {
+      toast.success("Successfully deleted");
+      setProjectsState((prevState) => {
+        return {
+          ...prevState,
+          selectedProjectId: undefined,
+        };
+      });
     });
   }
 
@@ -178,12 +224,15 @@ function App() {
     setProjectsState((prevState) => {
       const updatedProjects = prevState.projects.map((project) => {
         if (project.id === prevState.selectedProjectId) {
-          return {
-            ...project,
+          const productRef = doc(db, "projects", project.id);
+
+          updateDoc(productRef, {
             tasks: project.tasks.map((task) =>
               task.id === taskId ? { ...task, pinned: !task.pinned } : task
             ),
-          };
+          }).then((data) => {
+            toast.success("Successfully");
+          });
         }
         return project;
       });
@@ -199,7 +248,13 @@ function App() {
     setProjectsState((prevState) => {
       const updatedProjects = prevState.projects.map((project) => {
         if (project.id === projectId) {
-          return { ...project, pinned: !project.pinned };
+          const productRef = doc(db, "projects", project.id);
+
+          updateDoc(productRef, {
+            pinned: !project.pinned,
+          }).then((data) => {
+            toast.success("Successfully");
+          });
         }
         return project;
       });
@@ -214,6 +269,7 @@ function App() {
   const selectedProject = projectsState.projects.find(
     (project) => project.id === projectsState.selectedProjectId
   );
+
   let content = (
     <SelectedProject
       project={selectedProject}
